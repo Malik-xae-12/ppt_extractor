@@ -1,0 +1,11 @@
+fastapi
+python-multipart
+uvicorn
+uvicorn[standard]
+sqlalchemy
+alembic
+pydantic
+pydantic-settings
+markitdown[pptx]
+python-pptx
+psycopg2-binary
