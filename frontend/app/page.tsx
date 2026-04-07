@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { extractPptx } from "@/services/extract.service";
-import type { ExtractionResponse } from "@/types/api.types";
+import { extractPptx, enhancePptx } from "@/services/extract.service";
+import type { ExtractionResponse, ProjectCharter } from "@/types/api.types";
 import { PresentationViewer } from "@/components/ppt/PresentationViewer";
-import { FileUp, Zap, Server, Shield, Sparkles } from "lucide-react";
+import { FileUp, Zap, Server, Shield, Sparkles, Wand2 } from "lucide-react";
 
 export default function Home() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ExtractionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isEnhanceMode, setIsEnhanceMode] = useState(false);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -25,10 +26,21 @@ export default function Home() {
     setData(null);
 
     try {
-      const response = await extractPptx(file);
-      setData(response);
+      if (isEnhanceMode) {
+        const charter = await enhancePptx(file);
+        // Create a fake ExtractionResponse with the charter
+        setData({
+          filename: file.name,
+          full_markdown: "Charter generated via Enhanced Mode.",
+          slides: [],
+          project_charter: charter
+        });
+      } else {
+        const response = await extractPptx(file);
+        setData(response);
+      }
     } catch (err: any) {
-      setError(err.message || 'Data ingestion failed.');
+      setError(err.message || 'Operation failed.');
     } finally {
       setLoading(false);
     }
@@ -57,10 +69,23 @@ export default function Home() {
               Transform opaque `.pptx` archives into structured, actionable JSON endpoints. Instantly extract native text, scalable tables, and architecture diagrams into our dedicated dark-mode analytics terminal.
             </p>
 
-            <div className="flex items-center justify-center gap-8 text-sm font-semibold text-slate-500 pt-4">
-              <span className="flex items-center gap-2"><Shield size={16} className="text-emerald-500/80"/> Secure Transfer</span>
-              <span className="flex items-center gap-2"><Zap size={16} className="text-amber-500/80" /> Instant Parsing</span>
-              <span className="flex items-center gap-2"><Sparkles size={16} className="text-pink-500/80"/> AI Recognition</span>
+            <div className="flex flex-col items-center gap-6 pt-4">
+              <div className="flex items-center justify-center gap-8 text-sm font-semibold text-slate-500">
+                <span className="flex items-center gap-2"><Shield size={16} className="text-emerald-500/80"/> Secure Transfer</span>
+                <span className="flex items-center gap-2"><Zap size={16} className="text-amber-500/80" /> Instant Parsing</span>
+                <span className="flex items-center gap-2"><Sparkles size={16} className="text-pink-500/80"/> AI Recognition</span>
+              </div>
+
+              <button 
+                onClick={() => setIsEnhanceMode(!isEnhanceMode)}
+                className={`flex items-center gap-3 px-6 py-3 rounded-full border transition-all duration-300 font-bold text-sm tracking-wide uppercase
+                  ${isEnhanceMode 
+                    ? 'bg-indigo-500 border-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]' 
+                    : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'}`}
+              >
+                <Wand2 size={16} />
+                {isEnhanceMode ? 'Enhanced Mode Active' : 'Enable Enhanced Mode'}
+              </button>
             </div>
           </header>
         )}

@@ -9,3 +9,4 @@ pydantic-settings
 markitdown[pptx]
 python-pptx
 psycopg2-binary
+openai

@@ -7,8 +7,16 @@ export interface ExtractedSlide {
   architecture_diagrams: string[];
 }
 
+export interface ProjectCharter {
+  objective: string;
+  scope: string;
+  assumptions: string;
+  milestones: string;
+}
+
 export interface ExtractionResponse {
   filename: string;
   full_markdown: string;
   slides: ExtractedSlide[];
+  project_charter?: ProjectCharter;
 }

@@ -3,14 +3,17 @@
 import { useState } from "react";
 import type { ExtractionResponse } from "@/types/api.types";
 import { SlideViewer } from "./SlideViewer";
-import { Copy, ChevronRight, LayoutTemplate, FileText } from "lucide-react";
+import { Copy, ChevronRight, LayoutTemplate, FileText, ClipboardList } from "lucide-react";
+import { CharterViewer } from "./CharterViewer";
 
 interface Props {
   data: ExtractionResponse;
 }
 
 export function PresentationViewer({ data }: Props) {
-  const [activeTab, setActiveTab] = useState<'slides' | 'markdown'>('slides');
+  const [activeTab, setActiveTab] = useState<'slides' | 'markdown' | 'charter'>(
+    data.project_charter ? 'charter' : 'slides'
+  );
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
   const activeSlide = data.slides[activeSlideIndex];
@@ -43,6 +46,17 @@ export function PresentationViewer({ data }: Props) {
             Visual Canvas
           </button>
           <button
+            onClick={() => setActiveTab('charter')}
+            className={`flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-lg transition-all ${
+              activeTab === 'charter' 
+                ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+            }`}
+          >
+            <ClipboardList size={16} />
+            Project Charter
+          </button>
+          <button
             onClick={() => setActiveTab('markdown')}
             className={`flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-lg transition-all ${
               activeTab === 'markdown' 
@@ -58,7 +72,7 @@ export function PresentationViewer({ data }: Props) {
 
       {/* Main Workspace Area */}
       <div className="flex-1 flex overflow-hidden relative">
-        {activeTab === 'slides' ? (
+        {activeTab === 'slides' && (
           <>
             {/* Sidebar Navigation */}
             <aside className="w-72 md:w-80 shrink-0 border-r border-white/5 bg-[#0F131C] overflow-y-auto custom-scrollbar flex flex-col">
@@ -106,7 +120,13 @@ export function PresentationViewer({ data }: Props) {
               </div>
             </main>
           </>
-        ) : (
+        )}
+
+        {activeTab === 'charter' && (
+          <CharterViewer initialCharter={data.project_charter} fullMarkdown={data.full_markdown} />
+        )}
+
+        {activeTab === 'markdown' && (
           <div className="flex-1 overflow-y-auto bg-[#06080A] p-8 custom-scrollbar">
             <div className="max-w-4xl mx-auto relative group">
               <button 
